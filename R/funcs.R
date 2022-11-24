@@ -1,3 +1,8 @@
+Huber_loss <- function(x, delta = 1) {
+  psi = ifelse(abs(x) <= delta, 1/2 * x^2, delta * (abs(x)- 1/2*delta))
+  return(psi)
+}
+
 hierNet <- function(x, y, lam, delta=1e-8, strong=FALSE, diagonal=TRUE, aa=NULL, zz=NULL, center=TRUE, stand.main=TRUE, stand.int=FALSE, 
                     rho=nrow(x), niter=100, sym.eps=1e-3,
                     step=1, maxiter=2000, backtrack=0.2, tol=1e-5,
@@ -369,7 +374,12 @@ Objective <- function(aa, x, y, lam.l1, lam.l2, xnum=NULL, zz=NULL, strong=TRUE,
   r <- y - Compute.yhat.c(xnum, zz, aa)
   pen <- lam.l1 * sum(aa$bp + aa$bn) + lam.l1 * sum(abs(aa$th))/2 + lam.l1 * sum(abs(diag(aa$th)))/2
   pen <- pen + lam.l2 * (sum(aa$bp^2) + sum(aa$bn^2) + sum(aa$th^2))
-  sum(r^2)/2 + pen
+  #sum(r^2)/2 + pen
+  #####
+  rH <- Huber_loss(r)
+  loss <- sum(rH)
+  loss + pen
+  #####
 }
 
 Objective.logistic <- function(aa, x, y, lam.l1, lam.l2, xnum=NULL, zz=NULL, strong=TRUE, sym.eps=1e-3) {
@@ -786,7 +796,12 @@ ADMM4.Lagrangian <- function(aa, xnum, zz, y, lam.l1, lam.l2, diagonal, rho) {
   #admm <- sum(V*aa$th) + (rho/2) * sum(aa$th^2) + (rho/2)*sum(aa$tt^2) - sum(aa$u*aa$tt)
   pen <- lam.l1 * (sum(aa$bp + aa$bn) + sum(abs(aa$th))/2)
   pen <- pen + lam.l2 * (sum(aa$bp^2) + sum(aa$bn^2) + sum(aa$th^2))
-  sum(r^2)/2 + pen + admm
+  #sum(r^2)/2 + pen + admm
+  #####
+  rH <- Huber_loss(r)
+  loss <- sum(rH)
+  loss + pen + admm
+  #####
 }
 
 
